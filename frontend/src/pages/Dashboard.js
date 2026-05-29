@@ -89,6 +89,39 @@ export default function Dashboard() {
       </div>
 
       <div className="page-content">
+
+        {/* Welcome Banner */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(16,185,129,0.08) 100%)',
+          border: '1px solid rgba(59,130,246,0.25)',
+          borderRadius: 10, padding: '16px 20px', marginBottom: 16,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12
+        }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent)', marginBottom: 4 }}>
+              👋 Welcome to RetailVault
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 600, lineHeight: 1.6 }}>
+              A full-stack retail data warehousing platform built with <strong style={{color:'var(--text)'}}>Spring Boot</strong>, <strong style={{color:'var(--text)'}}>React</strong>, and <strong style={{color:'var(--text)'}}>MySQL</strong>. Transactional data from the OLTP database is extracted, transformed, and loaded into a <strong style={{color:'var(--text)'}}>star schema warehouse</strong> via a scheduled <strong style={{color:'var(--text)'}}>Spring Batch ETL pipeline</strong> — powering real-time analytics across sales, inventory, and regional performance.
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            {[
+              { label: 'Spring Boot', color: '#10b981' },
+              { label: 'Spring Batch ETL', color: '#3b82f6' },
+              { label: 'Star Schema', color: '#8b5cf6' },
+              { label: 'SCD Type 2', color: '#f59e0b' },
+              { label: 'React', color: '#06b6d4' },
+              { label: 'MySQL', color: '#10b981' },
+            ].map(t => (
+              <span key={t.label} style={{
+                fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 4,
+                border: `1px solid ${t.color}66`, color: t.color, background: `${t.color}18`
+              }}>{t.label}</span>
+            ))}
+          </div>
+        </div>
+
         {/* KPI Cards */}
         <div className="kpi-grid">
           <div className="kpi-card">
