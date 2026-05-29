@@ -1,0 +1,55 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: retailvault-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/src/main/resources/schema-oltp.sql:/docker-entrypoint-initdb.d/01-schema-oltp.sql
+      - ./backend/src/main/resources/schema-warehouse.sql:/docker-entrypoint-initdb.d/02-schema-warehouse.sql
+      - ./backend/src/main/resources/seed-data.sql:/docker-entrypoint-initdb.d/03-seed-data.sql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: retailvault-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_OLTP_URL: jdbc:mysql://mysql:3306/retailvault_oltp?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_OLTP_USERNAME: root
+      SPRING_DATASOURCE_OLTP_PASSWORD: root
+      SPRING_DATASOURCE_WAREHOUSE_URL: jdbc:mysql://mysql:3306/retailvault_warehouse?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_WAREHOUSE_USERNAME: root
+      SPRING_DATASOURCE_WAREHOUSE_PASSWORD: root
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: retailvault-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  mysql_data:
