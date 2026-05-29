@@ -21,6 +21,6 @@ public class OrderItem {
     @Column(name = "unit_price")
     private BigDecimal unitPrice;
     private BigDecimal discount;
-    @Column(name = "line_total")
+    @Column(name = "line_total", insertable = false, updatable = false)
     private BigDecimal lineTotal;
 }
