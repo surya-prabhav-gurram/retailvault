@@ -12,9 +12,9 @@ const fmtNum = (n) => n >= 1000000 ? `${(n/1000000).toFixed(1)}M` : n >= 1000 ? 
 const fmtDt = (dt) => { if (!dt) return '—'; const d = new Date(dt + 'Z'); return d.toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }); };
 
 const SCENARIOS = [
-  { key: 'NORMAL', label: '🛒 Generate Orders', desc: 'Add random orders to OLTP', color: '#3b82f6', count: 20 },
-  { key: 'BLACK_FRIDAY', label: '🔥 Black Friday', desc: 'Surge: 80 high-volume orders', color: '#ef4444', count: 80 },
-  { key: 'RESTOCK', label: '📦 Restock Inventory', desc: 'Replenish low-stock items', color: '#10b981', count: 0 },
+  { key: 'NORMAL', label: 'Generate Orders', desc: 'Add random orders to OLTP', color: '#3b82f6', count: 20 },
+  { key: 'BLACK_FRIDAY', label: 'Black Friday', desc: 'Surge: 80 high-volume orders', color: '#ef4444', count: 80 },
+  { key: 'RESTOCK', label: 'Restock Inventory', desc: 'Replenish low-stock items', color: '#10b981', count: 0 },
 ];
 
 export default function Dashboard() {
@@ -132,7 +132,7 @@ export default function Dashboard() {
         <div>
           <h2>Dashboard</h2>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-            Retail Data Warehouse — FY {year}
+            Retail Data Warehouse — FY {year} · Built by Surya Prabhav Gurram
           </div>
         </div>
         <div className="topbar-right">
@@ -157,7 +157,7 @@ export default function Dashboard() {
         }}>
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent)', marginBottom: 4 }}>
-              👋 Welcome to RetailVault
+              Welcome to RetailVault
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 620, lineHeight: 1.6 }}>
               A full-stack retail data warehousing platform. Transactional data from <strong style={{color:'var(--text)'}}>MySQL OLTP</strong> is
