@@ -77,4 +77,9 @@ public class AnalyticsController {
         int y = year == 0 ? LocalDate.now().getYear() : year;
         return ResponseEntity.ok(ApiResponse.ok(analyticsService.getInventoryMovementSummary(y)));
     }
+
+    @GetMapping("/recent-orders")
+    public ResponseEntity<ApiResponse<List<com.retailvault.dto.RecentOrderDto>>> getRecentOrders() {
+        return ResponseEntity.ok(ApiResponse.ok(analyticsService.getRecentOrders()));
+    }
 }

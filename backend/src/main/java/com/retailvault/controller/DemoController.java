@@ -19,15 +19,25 @@ public class DemoController {
 
     @PostMapping("/generate-orders")
     public ResponseEntity<ApiResponse<Map<String, Object>>> generateOrders(
-            @RequestParam(defaultValue = "10") int count) {
-        if (count < 1 || count > 100) {
-            return ResponseEntity.badRequest()
-                .body(ApiResponse.error("Count must be between 1 and 100"));
+            @RequestParam(defaultValue = "10") int count,
+            @RequestParam(defaultValue = "NORMAL") String scenario) {
+        if (count < 1 || count > 200) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("Count must be between 1 and 200"));
         }
-        int created = demoService.generateOrders(count);
+        int created = demoService.generateOrders(count, scenario);
         return ResponseEntity.ok(ApiResponse.ok(Map.of(
             "ordersCreated", created,
+            "scenario", scenario,
             "message", created + " orders generated. Run ETL to see them in the dashboard."
+        )));
+    }
+
+    @PostMapping("/restock-inventory")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> restockInventory() {
+        int count = demoService.restockInventory();
+        return ResponseEntity.ok(ApiResponse.ok(Map.of(
+            "restockedEntries", count,
+            "message", count + " inventory entries restocked. Run ETL to update alerts."
         )));
     }
 }

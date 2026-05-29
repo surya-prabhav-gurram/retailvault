@@ -22,9 +22,10 @@ public class DemoService {
     private final StoreOltpRepository storeOltpRepository;
     private final ProductOltpRepository productOltpRepository;
     private final CustomerOltpRepository customerOltpRepository;
+    private final InventoryLogRepository inventoryLogRepository;
 
     @Transactional("oltpTransactionManager")
-    public int generateOrders(int count) {
+    public int generateOrders(int count, String scenario) {
         List<Store> stores = storeOltpRepository.findAll();
         List<Product> products = productOltpRepository.findAll();
         List<Customer> customers = customerOltpRepository.findAll();
@@ -34,6 +35,7 @@ public class DemoService {
         }
 
         Random rnd = new Random();
+        boolean isBlackFriday = "BLACK_FRIDAY".equals(scenario);
         int ordersCreated = 0;
 
         for (int i = 0; i < count; i++) {
@@ -43,19 +45,23 @@ public class DemoService {
             Order order = new Order();
             order.setStore(store);
             order.setCustomer(customer);
-            order.setOrderDate(LocalDateTime.now().minusDays(rnd.nextInt(30)));
+            // Black Friday orders cluster in last 3 days; normal orders spread over 30 days
+            int daysBack = isBlackFriday ? rnd.nextInt(3) : rnd.nextInt(30);
+            order.setOrderDate(LocalDateTime.now().minusDays(daysBack));
             order.setStatus("COMPLETED");
 
-            int itemCount = 1 + rnd.nextInt(3);
+            // Black Friday: more items, higher qty
+            int itemCount = isBlackFriday ? 2 + rnd.nextInt(4) : 1 + rnd.nextInt(3);
             BigDecimal total = BigDecimal.ZERO;
 
             for (int j = 0; j < itemCount; j++) {
                 Product product = products.get(rnd.nextInt(products.size()));
-                int qty = 1 + rnd.nextInt(5);
+                int qty = isBlackFriday ? 3 + rnd.nextInt(8) : 1 + rnd.nextInt(5);
                 BigDecimal price = product.getUnitPrice();
-                BigDecimal discount = rnd.nextInt(10) < 3
-                    ? BigDecimal.valueOf(rnd.nextInt(20) + 5)
-                    : BigDecimal.ZERO;
+                // Black Friday: bigger discounts
+                BigDecimal discount = isBlackFriday
+                    ? BigDecimal.valueOf(15 + rnd.nextInt(25))
+                    : (rnd.nextInt(10) < 3 ? BigDecimal.valueOf(rnd.nextInt(20) + 5) : BigDecimal.ZERO);
                 BigDecimal gross = price.multiply(BigDecimal.valueOf(qty));
                 BigDecimal discAmt = gross.multiply(discount).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
                 BigDecimal lineTotal = gross.subtract(discAmt);
@@ -76,7 +82,33 @@ public class DemoService {
             ordersCreated++;
         }
 
-        log.info("Generated {} demo orders", ordersCreated);
+        log.info("Generated {} {} orders", ordersCreated, scenario);
         return ordersCreated;
+    }
+
+    @Transactional("oltpTransactionManager")
+    public int restockInventory() {
+        List<Store> stores = storeOltpRepository.findAll();
+        List<Product> products = productOltpRepository.findAll();
+        Random rnd = new Random();
+        int count = 0;
+
+        for (Store store : stores) {
+            for (Product product : products) {
+                int restockQty = 20 + rnd.nextInt(30);
+                InventoryLog log2 = new InventoryLog();
+                log2.setStore(store);
+                log2.setProduct(product);
+                log2.setMovementType("RESTOCK");
+                log2.setQuantity(restockQty);
+                log2.setStockBefore(rnd.nextInt(10));
+                log2.setStockAfter(log2.getStockBefore() + restockQty);
+                log2.setMovementDate(LocalDateTime.now());
+                inventoryLogRepository.save(log2);
+                count++;
+            }
+        }
+        log.info("Restocked {} product-store combinations", count);
+        return count;
     }
 }

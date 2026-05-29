@@ -2,6 +2,7 @@ package com.retailvault.service;
 
 import com.retailvault.dto.*;
 import com.retailvault.entity.warehouse.EtlRunLog;
+import com.retailvault.repository.oltp.OrderItemRepository;
 import com.retailvault.repository.warehouse.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,7 @@ public class AnalyticsService {
 
     private final FactSalesRepository factSalesRepository;
     private final FactInventoryRepository factInventoryRepository;
+    private final OrderItemRepository orderItemRepository;
     private final EtlRunLogRepository etlRunLogRepository;
 
     public KpiSummaryDto getKpiSummary(int year) {
@@ -151,5 +154,18 @@ public class AnalyticsService {
         }
         if (val instanceof Number) return ((Number) val).longValue();
         try { return new BigDecimal(val.toString()).longValue(); } catch (Exception e) { return 0L; }
+    }
+
+    public List<RecentOrderDto> getRecentOrders() {
+        return orderItemRepository.findRecentOrders().stream().map(r -> {
+            RecentOrderDto dto = new RecentOrderDto();
+            dto.setOrderId(r[0] != null ? ((Number) r[0]).intValue() : null);
+            dto.setStoreName(r[1] != null ? r[1].toString() : "");
+            dto.setCustomerName(r[2] != null ? r[2].toString() : "Guest");
+            dto.setTotalAmount(r[3] != null ? new BigDecimal(r[3].toString()) : BigDecimal.ZERO);
+            dto.setOrderDate(r[4] != null ? ((java.sql.Timestamp) r[4]).toLocalDateTime() : null);
+            dto.setStatus(r[5] != null ? r[5].toString() : "");
+            return dto;
+        }).collect(Collectors.toList());
     }
 }

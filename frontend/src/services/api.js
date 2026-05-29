@@ -22,6 +22,7 @@ export const analyticsApi = {
   getInventoryTurnover: () => api.get('/analytics/inventory/turnover'),
   getLowStockAlerts: () => api.get('/analytics/inventory/low-stock'),
   getInventoryMovements: (year) => api.get(`/analytics/inventory/movements?year=${year}`),
+  getRecentOrders: () => api.get('/analytics/recent-orders'),
 };
 
 // ETL
@@ -29,4 +30,10 @@ export const etlApi = {
   trigger: (triggeredBy = 'MANUAL_UI') => api.post('/etl/trigger', { triggeredBy }),
   getHistory: () => api.get('/etl/history'),
   getLatestStatus: () => api.get('/etl/status/latest'),
+};
+
+// Demo
+export const demoApi = {
+  generateOrders: (count, scenario = 'NORMAL') => api.post(`/demo/generate-orders?count=${count}&scenario=${scenario}`),
+  restockInventory: () => api.post('/demo/restock-inventory'),
 };
