@@ -17,7 +17,7 @@ function fmtDuration(secs) {
 
 function fmtDt(dt) {
   if (!dt) return '—';
-  return new Date(dt).toLocaleString();
+  return new Date(dt).toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
 const PIPELINE_STEPS = [
