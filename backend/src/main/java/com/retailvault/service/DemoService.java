@@ -75,6 +75,19 @@ public class DemoService {
                 item.setLineTotal(lineTotal);
                 orderItemRepository.save(item);
                 total = total.add(lineTotal);
+
+                // Write inventory log for stock decrease
+                int stockBefore = 20 + rnd.nextInt(30);
+                int stockAfter = Math.max(0, stockBefore - qty);
+                InventoryLog invLog = new InventoryLog();
+                invLog.setStore(store);
+                invLog.setProduct(product);
+                invLog.setMovementType("SALE");
+                invLog.setQuantity(qty);
+                invLog.setStockBefore(stockBefore);
+                invLog.setStockAfter(stockAfter);
+                invLog.setMovementDate(order.getOrderDate());
+                inventoryLogRepository.save(invLog);
             }
 
             order.setTotalAmount(total);
