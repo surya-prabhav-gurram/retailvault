@@ -23,6 +23,7 @@ public class DemoService {
     private final ProductOltpRepository productOltpRepository;
     private final CustomerOltpRepository customerOltpRepository;
     private final InventoryLogRepository inventoryLogRepository;
+    private final OrderOltpRepository orderOltpRepository;
 
     @Transactional("oltpTransactionManager")
     public int generateOrders(int count, String scenario) {
@@ -45,12 +46,12 @@ public class DemoService {
             Order order = new Order();
             order.setStore(store);
             order.setCustomer(customer);
-            // Black Friday orders cluster in last 3 days; normal orders spread over 30 days
             int daysBack = isBlackFriday ? rnd.nextInt(3) : rnd.nextInt(30);
             order.setOrderDate(LocalDateTime.now().minusDays(daysBack));
             order.setStatus("COMPLETED");
+            order.setTotalAmount(BigDecimal.ZERO);
+            order = orderOltpRepository.save(order);
 
-            // Black Friday: more items, higher qty
             int itemCount = isBlackFriday ? 2 + rnd.nextInt(4) : 1 + rnd.nextInt(3);
             BigDecimal total = BigDecimal.ZERO;
 
@@ -58,7 +59,6 @@ public class DemoService {
                 Product product = products.get(rnd.nextInt(products.size()));
                 int qty = isBlackFriday ? 3 + rnd.nextInt(8) : 1 + rnd.nextInt(5);
                 BigDecimal price = product.getUnitPrice();
-                // Black Friday: bigger discounts
                 BigDecimal discount = isBlackFriday
                     ? BigDecimal.valueOf(15 + rnd.nextInt(25))
                     : (rnd.nextInt(10) < 3 ? BigDecimal.valueOf(rnd.nextInt(20) + 5) : BigDecimal.ZERO);
@@ -73,12 +73,12 @@ public class DemoService {
                 item.setUnitPrice(price);
                 item.setDiscount(discount);
                 item.setLineTotal(lineTotal);
-
                 orderItemRepository.save(item);
                 total = total.add(lineTotal);
             }
 
             order.setTotalAmount(total);
+            orderOltpRepository.save(order);
             ordersCreated++;
         }
 
