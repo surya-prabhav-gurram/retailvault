@@ -12,14 +12,15 @@ public interface FactInventoryRepository extends JpaRepository<FactInventory, Lo
 
     @Query(value = """
         SELECT dp.product_name, ds.store_name,
-               SUM(CASE WHEN fi.movement_type = 'SALE' THEN fi.quantity_moved ELSE 0 END),
+               COALESCE(SUM(fs.quantity), 0),
                AVG(fi.stock_after),
                MIN(fi.stock_after)
         FROM retailvault_warehouse.fact_inventory fi
         JOIN retailvault_warehouse.dim_product dp ON fi.product_key = dp.product_key
         JOIN retailvault_warehouse.dim_store ds ON fi.store_key = ds.store_key
+        LEFT JOIN retailvault_warehouse.fact_sales fs ON fs.product_key = fi.product_key AND fs.store_key = fi.store_key
         GROUP BY dp.product_name, ds.store_name
-        ORDER BY SUM(CASE WHEN fi.movement_type = 'SALE' THEN fi.quantity_moved ELSE 0 END) DESC
+        ORDER BY COALESCE(SUM(fs.quantity), 0) DESC
         LIMIT 20
     """, nativeQuery = true)
     List<Object[]> getInventoryTurnover();
